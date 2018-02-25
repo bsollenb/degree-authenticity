@@ -1,0 +1,6 @@
+
+query selectMembers {
+  description: "Select all students"
+  statement:
+      SELECT org.degree.ucsd.Student
+}

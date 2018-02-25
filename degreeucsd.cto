@@ -1,0 +1,79 @@
+/**
+ * A business network where members can grant/revoke access to their personal information to other members
+ */
+namespace org.degree.ucsd
+
+asset Degree identified by contractID{
+    o String contractID
+    --> Student student
+    o GradStatus status
+    o MajorType major
+    o MajorType2 major2 optional
+    o MinorType minor
+    o MinorType2 minor2 optional
+    o Double gpa
+    o DateTime yearStart
+    o DateTime yearGrad optional
+}
+
+enum MajorType{
+    o Art
+    o Business
+    o ComputerScience
+    o Mathematics
+    o PoliticalScience
+    o Sociology
+}
+
+enum MajorType2{
+    o Art
+    o Business
+    o ComputerScience
+    o Mathematics
+    o PoliticalScience
+    o Sociology
+}
+
+enum MinorType{
+    o Art
+    o Business
+    o ComputerScience
+    o Mathematics
+    o PoliticalScience
+    o Sociology
+}
+
+enum MinorType2{
+    o Art
+    o Business
+    o ComputerScience
+    o Mathematics
+    o PoliticalScience
+    o Sociology
+}
+
+participant NetworkAdmin identified by participantID {
+    o String participantID
+}
+
+participant Employer identified by email {
+    o String email
+}
+
+participant Student identified by email {
+    o String email
+    o String firstName
+    o String lastName
+    o DateTime dob optional
+}
+
+enum GradStatus{
+    o ENROLLED
+    o GRADUATED
+    o INCOMPLETE
+}
+
+
+/**
+ * Types of Resource Definition Datatypes; String Double Integer Long DateTime and Boolean
+*/

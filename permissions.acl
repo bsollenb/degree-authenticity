@@ -1,0 +1,63 @@
+/**
+ * 2 types of control - Business network access (students, employers)
+ * and Network admin access (dev/architect)
+ */
+
+
+rule ConditionalAccess {
+    description: "Student allow employers access to read records if granted"
+    participant(p): "org.degree.ucsd.Student#participantID"
+    operation: READ
+    resource(r): "org.degree.ucsd.Employer#email"
+    condition: (r.authorized && r.authorized.indexOf(p.getIdentifier()) > -1)
+    action: ALLOW
+}
+
+rule AuthorizeAccessTransaction {
+    description: "Allow all participants to submit AuthorizeAccess transactions"
+    participant: "org.degree.ucsd.NetworkAdmin"
+    operation: CREATE
+    resource: "org.degree.ucsd.AuthorizeAccess"
+    action: ALLOW
+}
+
+rule RevokeAccessTransaction {
+    description: "Allow all participants to submit RevokeAccess transactions"
+    participant: "ANY"
+    operation: CREATE
+    resource: "org.degree.ucsd.RevokeAccess"
+    action: ALLOW
+}
+
+rule OwnRecordFullAccess {
+    description: "All have full access to own record"
+    participant(p): "org.degree.ucsd.Student"
+    operation: ALL
+    resource(r):"org.degree.ucsd.Student" 
+    condition: (r.getIdentifier() == p.getIdentifier())
+    action: ALLOW
+}
+
+rule SystemACL {
+  description:  "System ACL to permit all access"
+  participant: "org.hyperledger.composer.system.Participant"
+  operation: ALL
+  resource: "org.hyperledger.composer.system.**"
+  action: ALLOW
+}
+
+rule NetworkAdminUser {
+    description: "Grant business network administrators full access to user resources"
+    participant: "org.hyperledger.composer.system.NetworkAdmin"
+    operation: ALL
+    resource: "**"
+    action: ALLOW
+}
+
+rule NetworkAdminSystem {
+    description: "Grant business network administrators full access to system resources"
+    participant: "org.hyperledger.composer.system.NetworkAdmin"
+    operation: ALL
+    resource: "org.hyperledger.composer.system.**"
+    action: ALLOW
+}
