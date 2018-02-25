@@ -2,7 +2,7 @@
   "engines": {
     "composer": "^0.16.0"
   },
-  "name": "degauth-network",
+  "name": "degree-authenticity-network",
   "version": "0.2.0-20180102082548",
   "description": "Business Network to illustrate using Access Control over authenticated university degree.",
   "networkImage": "https://hyperledger.github.io/composer-sample-networks/packages/pii-network/networkimage.svg",
@@ -20,11 +20,11 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/hyperledger/composer-sample-networks.git"
+    "url": "https://github.com/bsollenb/degree-authenticity.git"
   },
   "keywords": [
     "access control",
-    "security",
+    "degree",
     "composer",
     "composer-network"
   ],
