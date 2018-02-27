@@ -41,7 +41,7 @@ function authorizeAccess(authorize) {
     if(index < 0) {
         me.authorized.push(authorize.memberId);
 
-        return getParticipantRegistry('org.degree.ucsd.Member')
+        return getParticipantRegistry('org.degree.ucsd.Student')
         .then(function (memberRegistry) {
 
             // emit an event
@@ -75,7 +75,7 @@ function revokeAccess(revoke) {
     if(index>-1) {
         me.authorized.splice(index, 1);
 
-        return getParticipantRegistry('org.degree.ucsd.Member')
+        return getParticipantRegistry('org.degree.ucsd.Student')
         .then(function (memberRegistry) {
 
             // emit an event
