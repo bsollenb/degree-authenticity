@@ -6,7 +6,7 @@
 
 rule ConditionalAccess {
     description: "Student allow employers access to read records if granted"
-    participant(p): "org.degree.ucsd.Student#participantID"
+    participant(p): "org.degree.ucsd.Student#MemberID"
     operation: READ
     resource(r): "org.degree.ucsd.Employer#email"
     condition: (r.authorized && r.authorized.indexOf(p.getIdentifier()) > -1)
@@ -14,16 +14,16 @@ rule ConditionalAccess {
 }
 
 rule AuthorizeAccessTransaction {
-    description: "Allow all participants to submit AuthorizeAccess transactions"
-    participant: "org.degree.ucsd.NetworkAdmin"
+    description: "Allow all students to submit AuthorizeAccess transactions"
+    participant: "org.degree.ucsd.Student"
     operation: CREATE
     resource: "org.degree.ucsd.AuthorizeAccess"
     action: ALLOW
 }
 
 rule RevokeAccessTransaction {
-    description: "Allow all participants to submit RevokeAccess transactions"
-    participant: "ANY"
+    description: "Allow all students to submit RevokeAccess transactions"
+    participant: "org.degree.ucsd.Student"
     operation: CREATE
     resource: "org.degree.ucsd.RevokeAccess"
     action: ALLOW
