@@ -58,6 +58,7 @@ participant NetworkAdmin identified by participantID {
 
 participant Employer identified by email {
     o String email
+    o String MemberID
 }
 
 participant Student identified by email {
@@ -65,6 +66,7 @@ participant Student identified by email {
     o String firstName
     o String lastName
     o DateTime dob optional
+    o String MemberID
 }
 
 enum GradStatus{
@@ -73,6 +75,13 @@ enum GradStatus{
     o INCOMPLETE
 }
 
+transaction AuthorizeAccess {
+  o String transactionID
+}
+
+transaction RevokeAccess {
+  o String transactionID
+}
 
 /**
  * Types of Resource Definition Datatypes; String Double Integer Long DateTime and Boolean
