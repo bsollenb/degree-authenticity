@@ -33,7 +33,7 @@ rule OwnRecordFullAccess {
     description: "All have full access to own record"
     participant(p): "org.degree.ucsd.Student"
     operation: ALL
-    resource(r):"org.degree.ucsd.Student" 
+    resource(r):"org.degree.ucsd.Degree#ContractID" 
     condition: (r.getIdentifier() == p.getIdentifier())
     action: ALLOW
 }
@@ -61,3 +61,4 @@ rule NetworkAdminSystem {
     resource: "org.hyperledger.composer.system.**"
     action: ALLOW
 }
+
