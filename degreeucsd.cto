@@ -82,7 +82,3 @@ transaction AuthorizeAccess {
 transaction RevokeAccess {
   o String transactionID
 }
-
-/**
- * Types of Resource Definition Datatypes; String Double Integer Long DateTime and Boolean
-*/
