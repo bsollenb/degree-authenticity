@@ -37,22 +37,6 @@ function authorizeAccess(authorize) {
     else {
         index = me.authorized.indexOf(authorize.memberId);
     }
-
-    if(index < 0) {
-        me.authorized.push(authorize.memberId);
-
-        return getParticipantRegistry('org.degree.ucsd.Student')
-        .then(function (memberRegistry) {
-
-            // emit an event
-            var event = getFactory().newEvent('org.degree.ucsd', 'MemberEvent');
-            event.memberTransaction = authorize;
-            emit(event);
-
-            // persist the state of the member
-            return memberRegistry.update(me);
-        });
-    }
 }
 
 /**
@@ -88,3 +72,4 @@ function revokeAccess(revoke) {
         });
     }
 }
+
