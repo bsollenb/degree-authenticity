@@ -5,9 +5,8 @@
   "name": "degree-authenticity-network",
   "version": "0.2.0-20180102082548",
   "description": "Business Network to illustrate using Access Control over authenticated university degree.",
-  "networkImage": "https://hyperledger.github.io/composer-sample-networks/packages/pii-network/networkimage.svg",
-  "networkImageanimated": "https://hyperledger.github.io/composer-sample-networks/packages/pii-network/networkimageanimated.svg",
-  "scripts": {
+  "networkImage": "https://i.imgur.com/xhDFomw.gif",
+  "networkImageanimated": "https://i.imgur.com/xhDFomw.gif": {
     "prepublish": "mkdirp ./dist && composer archive create  --sourceType dir --sourceName . -a ./dist/pii-network.bna",
     "pretest": "npm run lint",
     "lint": "eslint .",
