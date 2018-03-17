@@ -1,43 +1,62 @@
 /**
- * 2 types of control - Business network access (students, employers)
- * and Network admin access (dev/architect)
+ * Access control rules. These rules allow anyone to submit AuthorizeAccess
+ * and RevokeAccess transaction as well as granting full access to a member's
+ * own record. A member can access another member's details if the member has
+ * added them to their authorized list.
  */
 
-
-rule ConditionalAccess {
-    description: "Student allow employers access to read records if granted"
-    participant(p): "org.degree.ucsd.Student#MemberID"
-    operation: READ
-    resource(r): "org.degree.ucsd.Employer#email"
-    condition: (r.authorized && r.authorized.indexOf(p.getIdentifier()) > -1)
-    action: ALLOW
-}
-
 rule AuthorizeAccessTransaction {
-    description: "Allow all students to submit AuthorizeAccess transactions"
-    participant: "org.degree.ucsd.Student"
+    description: "Allow all participants to submit AuthorizeAccess transactions"
+    participant: "ANY"
     operation: CREATE
-    resource: "org.degree.ucsd.AuthorizeAccess"
+    resource: "org.acme.pii.AuthorizeAccess"
     action: ALLOW
 }
 
 rule RevokeAccessTransaction {
-    description: "Allow all students to submit RevokeAccess transactions"
-    participant: "org.degree.ucsd.Student"
+    description: "Allow all participants to submit RevokeAccess transactions"
+    participant: "ANY"
     operation: CREATE
-    resource: "org.degree.ucsd.RevokeAccess"
+    resource: "org.acme.pii.RevokeAccess"
     action: ALLOW
 }
 
 rule OwnRecordFullAccess {
-    description: "All have full access to own record"
-    participant(p): "org.degree.ucsd.Student"
+    description: "Allow all participants full access to their own record"
+    participant(p): "org.acme.pii.Member"
     operation: ALL
-    resource(r):"org.degree.ucsd.Degree#ContractID" 
-    condition: (r.getIdentifier() == p.getIdentifier())
+    resource(r): "org.acme.pii.Member"
+    condition: (r.getIdentifier() === p.getIdentifier())
     action: ALLOW
 }
 
+rule OwnDegreeFullAccess {
+    description: "Allow all participants full access to their own record"
+    participant(p): "org.acme.pii.Member"
+    operation: ALL
+    resource(r): "org.acme.pii.Degree"
+    condition: (r.Owner === p.getIdentifier())
+    action: ALLOW
+}
+
+rule ForeignRecordConditionalAccess {
+    description: "Allow participants access to other people's records if granted"
+    participant(p): "org.acme.pii.Member"
+    operation: ALL
+    resource(r): "org.acme.pii.Member"
+    condition: (r.authorized && r.authorized.indexOf(p.getIdentifier()) > -1)
+    action: ALLOW
+}
+
+ruleForeignDegreeConditionalAccess {
+    description: "Hope this works"
+    participant (e): "org.acme.pii.Member"
+    operation: ALL
+    resource(r): "org.acme.pii.Degree"
+    condition: (r.authorized && r.authorized.indexOf(e.getIdentifier()) > -1)
+    action: ALLOW
+}
+    
 rule SystemACL {
   description:  "System ACL to permit all access"
   participant: "org.hyperledger.composer.system.Participant"
@@ -61,4 +80,3 @@ rule NetworkAdminSystem {
     resource: "org.hyperledger.composer.system.**"
     action: ALLOW
 }
-
