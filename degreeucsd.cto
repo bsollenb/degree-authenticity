@@ -1,84 +1,57 @@
 /**
  * A business network where members can grant/revoke access to their personal information to other members
  */
-namespace org.degree.ucsd
+namespace org.acme.pii
 
-asset Degree identified by contractID{
-    o String contractID
-    --> Student student
-    o GradStatus status
-    o MajorType major
-    o MajorType2 major2 optional
-    o MinorType minor
-    o MinorType2 minor2 optional
-    o Double gpa
-    o DateTime yearStart
-    o DateTime yearGrad optional
+concept Address {
+    o String street
+    o String house
+    o String city
+    o String county
+    o String country
+    o String zip
 }
 
-enum MajorType{
-    o Art
-    o Business
-    o ComputerScience
-    o Mathematics
-    o PoliticalScience
-    o Sociology
-}
-
-enum MajorType2{
-    o Art
-    o Business
-    o ComputerScience
-    o Mathematics
-    o PoliticalScience
-    o Sociology
-}
-
-enum MinorType{
-    o Art
-    o Business
-    o ComputerScience
-    o Mathematics
-    o PoliticalScience
-    o Sociology
-}
-
-enum MinorType2{
-    o Art
-    o Business
-    o ComputerScience
-    o Mathematics
-    o PoliticalScience
-    o Sociology
-}
-
-participant NetworkAdmin identified by participantID {
-    o String participantID
-}
-
-participant Employer identified by email {
+participant Member identified by email {
     o String email
-    o String MemberID
-}
-
-participant Student identified by email {
-    o String email
-    o String firstName
-    o String lastName
+    o String firstName optional
+    o String lastName optional
     o DateTime dob optional
-    o String MemberID
+    o Address address optional
+    o String[] authorized optional
 }
 
-enum GradStatus{
-    o ENROLLED
-    o GRADUATED
-    o INCOMPLETE
+abstract transaction MemberTransaction {
+    o String memberId 
+    --> Member member
+    --> Degree degreeID
 }
 
-transaction AuthorizeAccess {
-  o String transactionID
+transaction AuthorizeAccess extends MemberTransaction {
 }
 
-transaction RevokeAccess {
-  o String transactionID
+transaction RevokeAccess extends MemberTransaction {
+}
+
+transaction AuthorizeDegree extends MemberTransaction {
+}
+
+event MemberEvent {
+    o MemberTransaction memberTransaction
+}
+
+asset Degree identified by degreeID{
+    o String degreeID
+    --> Member member
+    o String Owner
+    o String DegreeType
+    o String DegreeStatus
+    o String Major
+    o String Major2
+    o String Minor
+    o String Minor2
+    o String gpa
+    o String StartYear
+    o String GradYear
+    o String[] authorized optional
 }
