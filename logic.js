@@ -16,7 +16,7 @@
 
 /**
  * A Member grants access to their record to another Member.
- * @param {org.degree.ucsd.AuthorizeAccess} authorize - the authorize to be processed
+ * @param {org.acme.pii.AuthorizeAccess} authorize - the authorize to be processed
  * @transaction
  */
 function authorizeAccess(authorize) {
@@ -37,11 +37,27 @@ function authorizeAccess(authorize) {
     else {
         index = me.authorized.indexOf(authorize.memberId);
     }
+
+    if(index < 0) {
+        me.authorized.push(authorize.memberId);
+
+        return getParticipantRegistry('org.acme.pii.Member')
+        .then(function (memberRegistry) {
+
+            // emit an event
+            var event = getFactory().newEvent('org.acme.pii', 'MemberEvent');
+            event.memberTransaction = authorize;
+            emit(event);
+
+            // persist the state of the member
+            return memberRegistry.update(me);
+        });
+    }
 }
 
 /**
  * A Member revokes access to their record from another Member.
- * @param {org.degree.ucsd.RevokeAccess} revoke - the RevokeAccess to be processed
+ * @param {org.acme.pii.RevokeAccess} revoke - the RevokeAccess to be processed
  * @transaction
  */
 function revokeAccess(revoke) {
@@ -59,11 +75,11 @@ function revokeAccess(revoke) {
     if(index>-1) {
         me.authorized.splice(index, 1);
 
-        return getParticipantRegistry('org.degree.ucsd.Student')
+        return getParticipantRegistry('org.acme.pii.Member')
         .then(function (memberRegistry) {
 
             // emit an event
-            var event = getFactory().newEvent('org.degree.ucsd', 'MemberEvent');
+            var event = getFactory().newEvent('org.acme.pii', 'MemberEvent');
             event.memberTransaction = revoke;
             emit(event);
 
@@ -72,4 +88,43 @@ function revokeAccess(revoke) {
         });
     }
 }
+/**
+ * A Member revokes access to their record from another Member.
+ * @param {org.acme.pii.AuthorizeDegree} authorize - the AuthorizeDegree to be processed
+ * @transaction
+ */
+function authorizeDegree(authorize) {
 
+    var degree = authorizeDegree.degreeId();
+    console.log('**** AUTH: ' + getCurrentParticipant.degree() + ' granting access to ' + authorize.memberId );
+
+    if(!degree) {
+        throw new Error('A participant/certificate mapping does not exist.');
+    }
+
+    // if the member is not already authorized, we authorize them
+    var index = -1;
+
+    if(!degree.authorized) {
+        degree.authorized = [];
+    }
+    else {
+        index = degree.authorized.indexOf(authorize.memberId);
+    }
+
+    if(index < 0) {
+        degree.authorized.push(authorize.memberId);
+
+        return ('org.acme.pii.Member')
+        .then(function (degreeRegistry) {
+
+            // emit an event
+            var event = getFactory().newEvent('org.acme.pii', 'MemberEvent');
+            event.memberTransaction = authorize;
+            emit(event);
+
+            // persist the state of the member
+            return memberRegistry.update(degree);
+        });
+    }
+}
