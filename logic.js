@@ -16,115 +16,167 @@
 
 /**
  * A Member grants access to their record to another Member.
- * @param {org.acme.pii.AuthorizeAccess} authorize - the authorize to be processed
+ * @param {org.degree.ucsd.AuthorizeAccess} authorize - the authorize to be processed
  * @transaction
  */
 function authorizeAccess(authorize) {
 
     var me = getCurrentParticipant();
-    console.log('**** AUTH: ' + me.getIdentifier() + ' granting access to ' + authorize.memberId );
+    console.log('**** AUTH: ' + me.getIdentifier() + ' granting access to ' + authorize.memberId);
 
-    if(!me) {
+    if (!me) {
         throw new Error('A participant/certificate mapping does not exist.');
     }
 
     // if the member is not already authorized, we authorize them
     var index = -1;
 
-    if(!me.authorized) {
+    if (!me.authorized) {
         me.authorized = [];
     }
     else {
         index = me.authorized.indexOf(authorize.memberId);
     }
 
-    if(index < 0) {
+    if (index < 0) {
         me.authorized.push(authorize.memberId);
 
-        return getParticipantRegistry('org.acme.pii.Member')
-        .then(function (memberRegistry) {
+        return getParticipantRegistry('org.degree.ucsd.Member')
+            .then(function (memberRegistry) {
 
-            // emit an event
-            var event = getFactory().newEvent('org.acme.pii', 'MemberEvent');
-            event.memberTransaction = authorize;
-            emit(event);
+                // emit an event
+                var event = getFactory().newEvent('org.degree.ucsd', 'MemberEvent');
+                event.memberTransaction = authorize;
+                emit(event);
 
-            // persist the state of the member
-            return memberRegistry.update(me);
-        });
+                // persist the state of the member
+                return memberRegistry.update(me);
+            });
     }
 }
 
 /**
  * A Member revokes access to their record from another Member.
- * @param {org.acme.pii.RevokeAccess} revoke - the RevokeAccess to be processed
+ * @param {org.degree.ucsd.RevokeAccess} revoke - the RevokeAccess to be processed
  * @transaction
  */
 function revokeAccess(revoke) {
 
     var me = getCurrentParticipant();
-    console.log('**** REVOKE: ' + me.getIdentifier() + ' revoking access to ' + revoke.memberId );
+    console.log('**** REVOKE: ' + me.getIdentifier() + ' revoking access to ' + revoke.memberId);
 
-    if(!me) {
+    if (!me) {
         throw new Error('A participant/certificate mapping does not exist.');
     }
 
     // if the member is authorized, we remove them
     var index = me.authorized ? me.authorized.indexOf(revoke.memberId) : -1;
 
-    if(index>-1) {
+    if (index > -1) {
         me.authorized.splice(index, 1);
 
-        return getParticipantRegistry('org.acme.pii.Member')
-        .then(function (memberRegistry) {
+        return getParticipantRegistry('org.degree.ucsd.Member')
+            .then(function (memberRegistry) {
 
-            // emit an event
-            var event = getFactory().newEvent('org.acme.pii', 'MemberEvent');
-            event.memberTransaction = revoke;
-            emit(event);
+                // emit an event
+                var event = getFactory().newEvent('org.degree.ucsd', 'MemberEvent');
+                event.memberTransaction = revoke;
+                emit(event);
 
-            // persist the state of the member
-            return memberRegistry.update(me);
-        });
+                // persist the state of the member
+                return memberRegistry.update(me);
+            });
     }
 }
+
 /**
- * A Member revokes access to their record from another Member.
- * @param {org.acme.pii.AuthorizeDegree} authorize - the AuthorizeDegree to be processed
+ * A Member grants access to their Degree assets
+ * @param {org.degree.ucsd.AuthorizeDegreeAccess} transaction - authorize transaction
  * @transaction
  */
-function authorizeDegree(authorize) {
+function authorizeDegreeAccess(transaction) {
+    var me = getCurrentParticipant();
 
-    var degree = authorizeDegree.degreeId();
-    console.log('**** AUTH: ' + getCurrentParticipant.degree() + ' granting access to ' + authorize.memberId );
-
-    if(!degree) {
-        throw new Error('A participant/certificate mapping does not exist.');
+    if (me == null) {
+        throw new Error("A participant/certificate mapping does not exist");
     }
 
-    // if the member is not already authorized, we authorize them
-    var index = -1;
-
-    if(!degree.authorized) {
-        degree.authorized = [];
-    }
-    else {
-        index = degree.authorized.indexOf(authorize.memberId);
+    var requestorId = transaction.memberId;
+    if (requestorId == null) {
+        throw new Error("Invalid request. \"memberId\" should be defined");
     }
 
-    if(index < 0) {
-        degree.authorized.push(authorize.memberId);
+    var myId = me.getIdentifier();
+    console.log("Member " + myId + " grants \"Degree\" access to " + requestorId);
 
-        return ('org.acme.pii.Member')
-        .then(function (degreeRegistry) {
+    return query("getDegreeByMemberId", { memberId: myId })
+        .then(function (records) {
+            if (records.length > 0) {
+                var serializer = getSerializer();
+                var degree = serializer.toJSON(records[0]);
 
-            // emit an event
-            var event = getFactory().newEvent('org.acme.pii', 'MemberEvent');
-            event.memberTransaction = authorize;
-            emit(event);
+                if (!Array.isArray(degree.authorized)) {
+                    degree.authorized = [];
+                }
 
-            // persist the state of the member
-            return memberRegistry.update(degree);
-        });
+                if (degree.authorized.indexOf(requestorId) < 0) {
+                    degree.authorized.push(requestorId);
+
+                    return getAssetRegistry("org.degree.ucsd.Degree")
+                        .then(function (registry) { registry.update(serializer.fromJSON(degree)) })
+                        .then(function () {
+                            var event = getFactory().newEvent('org.degree.ucsd', 'DegreeEvent');
+                            event.degreeTransaction = transaction;
+                            emit(event);
+                        });
+                }
+            }
+        })
+        .catch(function (ex) { console.error(ex); throw ex; });
+}
+
+/**
+ * A Member revokes access to their Degree assets
+ * @param {org.degree.ucsd.RevokeDegreeAccess} transaction - revoke transaction
+ * @transaction
+ */
+function revokeDegreeAccess(transaction) {
+    var me = getCurrentParticipant();
+
+    if (me == null) {
+        throw new Error("A participant/certificate mapping does not exist");
     }
+
+    var requestorId = transaction.memberId;
+    if (requestorId == null) {
+        throw new Error("Invalid request. \"memberId\" should be defined");
+    }
+
+    var myId = me.getIdentifier();
+    console.log("Member " + myId + " grants \"Degree\" access to " + requestorId);
+
+    return query("getDegreeByMemberId", { memberId: myId })
+        .then(function (records) {
+            if (records.length > 0) {
+                var serializer = getSerializer();
+                var degree = serializer.toJSON(records[0]);
+
+                if (Array.isArray(degree.authorized)) {
+                    var index = degree.authorized.indexOf(requestorId);
+
+                    if (index >= 0) {
+                        degree.authorized.splice(index, 1);
+
+                        return getAssetRegistry("org.degree.ucsd.Degree")
+                            .then(function (registry) { registry.update(serializer.fromJSON(degree)) })
+                            .then(function () {
+                                var event = getFactory().newEvent('org.degree.ucsd', 'DegreeEvent');
+                                event.degreeTransaction = transaction;
+                                emit(event);
+                            });
+                    }
+                }
+            }
+        })
+        .catch(function (ex) { console.error(ex); throw ex; });
 }
