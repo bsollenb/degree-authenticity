@@ -9,7 +9,7 @@ rule AuthorizeAccessTransaction {
     description: "Allow all participants to submit AuthorizeAccess transactions"
     participant: "ANY"
     operation: CREATE
-    resource: "org.acme.pii.AuthorizeAccess"
+    resource: "org.degree.ucsd.AuthorizeAccess"
     action: ALLOW
 }
 
@@ -17,46 +17,62 @@ rule RevokeAccessTransaction {
     description: "Allow all participants to submit RevokeAccess transactions"
     participant: "ANY"
     operation: CREATE
-    resource: "org.acme.pii.RevokeAccess"
+    resource: "org.degree.ucsd.RevokeAccess"
+    action: ALLOW
+}
+
+rule AuthorizeDegreeTransaction {
+    description: "Allow all participants to submit AuthorizeDegree transactions"
+    participant: "ANY"
+    operation: CREATE
+    resource: "org.degree.ucsd.AuthorizeDegreeAccess"
+    action: ALLOW
+}
+
+rule RevokeDegreeTransaction {
+    description: "Allow all participants to submit RevokeDegree transactions"
+    participant: "ANY"
+    operation: CREATE
+    resource: "org.degree.ucsd.RevokeDegreeAccess"
     action: ALLOW
 }
 
 rule OwnRecordFullAccess {
     description: "Allow all participants full access to their own record"
-    participant(p): "org.acme.pii.Member"
+    participant(p): "org.degree.ucsd.Member"
     operation: ALL
-    resource(r): "org.acme.pii.Member"
+    resource(r): "org.degree.ucsd.Member"
     condition: (r.getIdentifier() === p.getIdentifier())
     action: ALLOW
 }
 
 rule OwnDegreeFullAccess {
     description: "Allow all participants full access to their own record"
-    participant(p): "org.acme.pii.Member"
+    participant(p): "org.degree.ucsd.Member"
     operation: ALL
-    resource(r): "org.acme.pii.Degree"
+    resource(r): "org.degree.ucsd.Degree"
     condition: (r.Owner === p.getIdentifier())
     action: ALLOW
 }
 
 rule ForeignRecordConditionalAccess {
     description: "Allow participants access to other people's records if granted"
-    participant(p): "org.acme.pii.Member"
-    operation: ALL
-    resource(r): "org.acme.pii.Member"
+    participant(p): "org.degree.ucsd.Member"
+    operation: READ
+    resource(r): "org.degree.ucsd.Member"
     condition: (r.authorized && r.authorized.indexOf(p.getIdentifier()) > -1)
     action: ALLOW
 }
 
-ruleForeignDegreeConditionalAccess {
+rule ForeignDegreeConditionalAccess {
     description: "Hope this works"
-    participant (e): "org.acme.pii.Member"
-    operation: ALL
-    resource(r): "org.acme.pii.Degree"
-    condition: (r.authorized && r.authorized.indexOf(e.getIdentifier()) > -1)
+    participant (p): "org.degree.ucsd.Member"
+    operation: READ
+    resource(r): "org.degree.ucsd.Degree"
+    condition: (r.authorized && r.authorized.indexOf(p.getIdentifier()) > -1)
     action: ALLOW
 }
-    
+
 rule SystemACL {
   description:  "System ACL to permit all access"
   participant: "org.hyperledger.composer.system.Participant"
