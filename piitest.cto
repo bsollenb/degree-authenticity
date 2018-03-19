@@ -1,8 +1,9 @@
 /**
  * A business network where members can grant/revoke access to their personal information to other members
  */
-namespace org.acme.pii
+namespace org.degree.ucsd
 
+// Concepts
 concept Address {
     o String street
     o String house
@@ -12,8 +13,10 @@ concept Address {
     o String zip
 }
 
+// Participants
 participant Member identified by email {
     o String email
+    --> Degree degree optional
     o String firstName optional
     o String lastName optional
     o DateTime dob optional
@@ -21,10 +24,11 @@ participant Member identified by email {
     o String[] authorized optional
 }
 
+// Transactions
+//  Member
 abstract transaction MemberTransaction {
-    o String memberId 
+    o String memberId
     --> Member member
-    --> Degree degreeID
 }
 
 transaction AuthorizeAccess extends MemberTransaction {
@@ -33,16 +37,21 @@ transaction AuthorizeAccess extends MemberTransaction {
 transaction RevokeAccess extends MemberTransaction {
 }
 
-transaction AuthorizeDegree extends MemberTransaction {
+//  Degree
+abstract transaction DegreeTransaction {
+  o String memberId
 }
 
-event MemberEvent {
-    o MemberTransaction memberTransaction
+transaction AuthorizeDegreeAccess extends DegreeTransaction {
 }
 
-asset Degree identified by degreeID{
-    o String degreeID
-    --> Member member
+transaction RevokeDegreeAccess extends DegreeTransaction {
+}
+
+// Assets
+asset Degree identified by degreeId {
+    o String degreeId
+    o String memberId
     o String Owner
     o String DegreeType
     o String DegreeStatus
@@ -54,4 +63,13 @@ asset Degree identified by degreeID{
     o String StartYear
     o String GradYear
     o String[] authorized optional
+}
+
+// Events
+event MemberEvent {
+    o MemberTransaction memberTransaction
+}
+
+event DegreeEvent {
+  o DegreeTransaction degreeTransaction
 }
