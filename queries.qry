@@ -1,6 +1,6 @@
-
-query selectMembers {
-  description: "Select all students"
+query getDegreeByMemberId {
+  description: "Get degree by member id"
   statement:
-      SELECT org.degree.ucsd.Student
+    SELECT org.degree.ucsd.Degree
+      WHERE (memberId == _$memberId)
 }
