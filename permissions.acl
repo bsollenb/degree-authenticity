@@ -46,10 +46,20 @@ rule OwnRecordFullAccess {
     action: ALLOW
 }
 
-rule OwnDegreeFullAccess {
-    description: "Allow all participants full access to their own record"
+rule OwnDegreeUpdateWithTx {
+    description: "Allow update to authorize element of degree for own degree asset via DegreeTransaction"
     participant(p): "org.degree.ucsd.Member"
-    operation: ALL
+    operation: UPDATE
+    resource(r): "org.degree.ucsd.Degree"
+    transaction (tx): "org.degree.ucsd.DegreeTransaction"
+    condition: (r.Owner === p.getIdentifier())
+    action: ALLOW
+}
+
+rule OwnDegreeReadAccess {
+    description: "Allow all participants read access only to their own degree assets"
+    participant(p): "org.degree.ucsd.Member"
+    operation: READ
     resource(r): "org.degree.ucsd.Degree"
     condition: (r.Owner === p.getIdentifier())
     action: ALLOW
