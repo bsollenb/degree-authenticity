@@ -16,7 +16,6 @@ concept Address {
 // Participants
 participant Member identified by email {
     o String email
-    --> Degree degree optional
     o String firstName optional
     o String lastName optional
     o DateTime dob optional
@@ -43,9 +42,11 @@ abstract transaction DegreeTransaction {
 }
 
 transaction AuthorizeDegreeAccess extends DegreeTransaction {
+  o String [] degreeIds 
 }
 
 transaction RevokeDegreeAccess extends DegreeTransaction {
+  o String [] degreeIds 
 }
 
 // Assets
